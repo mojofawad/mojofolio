@@ -1,15 +1,12 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /source
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
+WORKDIR /mojofolio.App
 
-COPY *.sln .
-COPY mojofolio.App/*.csproj ./mojofolio.App/
+COPY . ./
 RUN dotnet restore
-
-COPY mojofolio.App/. ./mojofolio.App/
-WORKDIR /source/mojofolio.App
-RUN dotnet publish -c release -o /app --no-restore
+RUN dotnet publish -c Release -o out
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
-WORKDIR /app
-COPY --from=build /app ./
+WORKDIR /mojofolio.App
+COPY --from=build-env /mojofolio.App/out .
 ENTRYPOINT ["dotnet", "mojofolio.App.dll"]
+EXPOSE 80
